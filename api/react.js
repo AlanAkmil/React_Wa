@@ -5,6 +5,9 @@ const baseUrl = 'https://amba-react-pi.vercel.app';
 const CONFIG_API = `${baseUrl}/api/config`;
 const REACT_API = `${baseUrl}/api/react`;
 
+// Fallback endpoint jika server utama 404
+const FALLBACK_API = 'https://api.ikyyxd.my.id/tools/reaction-wa';
+
 async function getSecretKey() {
     try {
         const res = await axios.get(CONFIG_API, { timeout: 5000 });
@@ -27,13 +30,8 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ success: false, message: 'Method Not Allowed' });
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method Not Allowed' });
 
     try {
         const { link, emojis, count = 1, mode = "1" } = req.body;
@@ -49,45 +47,58 @@ module.exports = async (req, res) => {
             emojiArr = emojis;
         }
 
-        if (emojiArr.length === 0) {
-            emojiArr = ["🔥"];
-        } else if (emojiArr.length > 4) {
-            emojiArr = emojiArr.slice(0, 4);
-        }
+        if (emojiArr.length === 0) emojiArr = ["🔥"];
+        else if (emojiArr.length > 4) emojiArr = emojiArr.slice(0, 4);
 
         const finalEmojiStr = emojiArr.join(',');
-        const secret = await getSecretKey();
-        
-        const payload = {
-            mode: String(mode),
-            link: link,
-            emoji: finalEmojiStr,
-            count: Number(count)
-        };
 
-        const payloadString = JSON.stringify(payload);
-        const timestamp = Date.now().toString();
-        const signature = generateSignature(payloadString, timestamp, secret);
+        // 1. Coba tembak Server Utama dulu
+        try {
+            const secret = await getSecretKey();
+            const payload = {
+                mode: String(mode),
+                link: link,
+                emoji: finalEmojiStr,
+                count: Number(count)
+            };
 
-        const apiRes = await axios.post(REACT_API, payloadString, {
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Timestamp': timestamp,
-                'X-Signature': signature,
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36'
-            },
-            timeout: 120000
-        });
+            const payloadString = JSON.stringify(payload);
+            const timestamp = Date.now().toString();
+            const signature = generateSignature(payloadString, timestamp, secret);
 
-        return res.status(200).json({
-            success: true,
-            data: apiRes.data
-        });
+            const apiRes = await axios.post(REACT_API, payloadString, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Timestamp': timestamp,
+                    'X-Signature': signature,
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36'
+                },
+                timeout: 10000
+            });
+
+            return res.status(200).json({ success: true, data: apiRes.data });
+
+        } catch (mainErr) {
+            // 2. Jika Server Utama Error (404/Timeout), Tembak Endpoint Fallback (GET)
+            const fallbackRes = await axios.get(FALLBACK_API, {
+                params: {
+                    url: link,
+                    emojis: finalEmojiStr
+                },
+                timeout: 30000
+            });
+
+            return res.status(200).json({
+                success: true,
+                note: 'Respon dari Server Fallback (api.ikyyxd.my.id)',
+                data: fallbackRes.data
+            });
+        }
 
     } catch (err) {
         return res.status(err.response?.status || 500).json({
             success: false,
-            message: err.response?.data?.message || err.message
+            message: err.response?.data?.message || err.message || 'Server Target Offline / Error'
         });
     }
 };
