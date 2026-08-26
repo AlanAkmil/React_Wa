@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WA REACT // BRUTALIST</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header-box">
+            <h1>WA_REACTION_v1.0</h1>
+            <p class="badge">STATUS: ONLINE</p>
+        </header>
+
+        <main class="main-card">
+            <form id="reactForm">
+                <div class="form-group">
+                    <label for="link">LINK CHANNEL / POST WA</label>
+                    <input type="text" id="link" placeholder="https://whatsapp.com/channel/..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>PILIH / INPUT EMOJI (MAX 4)</label>
+                    <input type="text" id="emojiInput" value="😛,😭,😆,🤪" placeholder="😛,😭,😆,🤪">
+                    <div class="emoji-presets">
+                        <button type="button" class="btn-preset" data-emoji="🔥,🚀,💥,👑">🔥 🚀 💥 👑</button>
+                        <button type="button" class="btn-preset" data-emoji="😛,😭,😆,🤪">😛 😭 😆 🤪</button>
+                        <button type="button" class="btn-preset" data-emoji="❤️,👍,😍,🎉">❤️ 👍 😍 🎉</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="count">COUNT</label>
+                        <input type="number" id="count" value="1" min="1" max="100">
+                    </div>
+                    <div class="form-group half">
+                        <label for="mode">MODE</label>
+                        <select id="mode">
+                            <option value="1">MODE 1 (STANDARD)</option>
+                            <option value="2">MODE 2 (TURBO)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-brutal">
+                    <span class="btn-text">NUKIR REACTION NOW!</span>
+                </button>
+            </form>
+        </main>
+
+        <section class="output-box" id="outputBox">
+            <h3>LOGS // OUTPUT</h3>
+            <pre id="jsonResult">// Awaiting command...</pre>
+        </section>
+
+        <footer>
+            <p>CREATED BY: <a href="https://t.me/AwasPhpJir" target="_blank">t.me/AwasPhpJir</a></p>
+            <p>API: <a href="https://api.ikyyxd.my.id" target="_blank">api.ikyyxd.my.id</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
