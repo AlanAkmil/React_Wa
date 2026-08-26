@@ -1,0 +1,10 @@
+{
+  "name": "wa-react-brutalism",
+  "version": "1.0.0",
+  "description": "WhatsApp Channel Reaction Tools with Brutalism UI",
+  "main": "api/react.js",
+  "dependencies": {
+    "axios": "^1.7.0",
+    "crypto": "^1.0.1"
+  }
+}
